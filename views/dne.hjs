@@ -8,9 +8,6 @@
 </head>
 <body>
 	<div id="horizontal-scroll"></div>
-	<div id="main">
-		<h1>Ready to begin!</h1><hr>
-		<h3>Look for QR codes hidden around the library to find questions. Answer all the questions and you will recieve a special prize...</h3>
-	</div>
+	<h1>{{ error }}</h1>
 </body>
 </html>

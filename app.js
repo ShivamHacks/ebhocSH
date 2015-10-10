@@ -17,20 +17,50 @@ app.set('view engine', 'hjs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(router);
 
+router.get('/', function(req, res, next) {
+  res.render('index', {
+  });
+});
+
 router.get('/:questionID', function(req, res, next) {
   var questionID = req.params.questionID;
   if (questionIDs.indexOf(questionID) > -1) {
     var question = questions[questionIDs.indexOf(questionID)];
-    res.render('index', {
-      title: 'Express',
+    res.render('question', {
+      title: 'Scavenger Hunt',
       question: question
     });
   } else {
-    res.render('error', {
+    res.render('dne', {
       error: 'Page does not exist'
     });
   }
 });
+
+var io = require('socket.io')(server);
+
+io.on('connection', function(socket){
+  socket.on('submit',function (data) { 
+    if (questionIDs.indexOf(data.questionID) > -1) {
+      var index = questionIDs.indexOf(data.questionID);
+      var cAnswer = answers[index];
+      var uAnswer = data.answer;
+      var correct;
+      var location;
+      if (cAnswer == uAnswer) {
+        location = locations[index];
+      } else {
+        location = 'Answer wrong, please try again.';
+      }
+      socket.emit('next', {
+        location: location
+      });
+    }
+  });
+  console.log('a user connected');
+});
+
+// DATA
 
 var questionIDs = [ // all in MD5
 'c31248e78aced0c36320b2f13a8a7891', // question 1
@@ -39,6 +69,10 @@ var questionIDs = [ // all in MD5
 ];
 
 var questions = [
+//'When was the floppy disk invented', // 1971
+//'What year was Google founded', // 1998
+//'What was the year of the UNIX Epoch', // 1970
+
 'How many gigabytes of data does google analyze per second?',
 'What is the largest number that you can store in a 64-bit integer variable?',
 'When was the first Apple Macintosh created?'
@@ -55,28 +89,6 @@ var locations = [
 'Correct! Your next question will be where library visitors go to eat and relax.',
 'Correct! Your next question will be in the same isle as the computer science books'
 ];
-
-var io = require('socket.io')(server);
-
-io.on('connection', function(socket){
-  socket.on('submit',function (data) { 
-    if (questionIDs.indexOf(data.questionID) > -1) {
-      var cAnswer = answers[questionIDs.indexOf(data.questionID)];
-      var uAnswer = data.answer;
-      var correct;
-      var location;
-      if (cAnswer == uAnswer) {
-        location = locations[questionIDs.indexOf(data.questionID)];
-      } else {
-        location = 'Answer wrong, please try again.';
-      }
-      socket.emit('next', {
-        location: location
-      });
-    }
-  });
-  console.log('a user connected');
-});
 
 /*
 
@@ -132,17 +144,8 @@ app.use(function(err, req, res, next) {
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
+  if (isNaN(port)) { return val; }
+  if (port >= 0) { return port; }
   return false;
 }
 
