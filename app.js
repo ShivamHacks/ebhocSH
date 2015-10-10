@@ -26,10 +26,9 @@ router.get('/:questionID', function(req, res, next) {
       question: question
     });
   } else {
-    // error
-    res.render('error') {
+    res.render('error', {
       error: 'Page does not exist'
-    }
+    });
   }
 });
 
