@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{ title }}</title>
+	<link rel="stylesheet" href="/stylesheets/style.css">
+	<link href='https://fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+	<div>
+		<h1>{{ question }}</h1>
+		<input id="answer" type="text" placeholder="your answer...">
+		<h2 id="response"></h2>
+	</div>
+
+	<script type="text/javascript" src="/javascripts/jquery.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+	var url = window.location.toString();
+	var questionID = url.substring(url.lastIndexOf("/") + 1, url.length);
+	//alert(url.substring(url.lastIndexOf("/") + 1, url.length));
+
+	var socket = io();
+
+	socket.on('next', function (data) {
+		$("#response").text(data.location);
+	});
+
+	$('#answer').on('keyup', function(e) {
+		if (e.which == 13) {
+			e.preventDefault();
+			if ($("#answer").val().trim().length > 0) {
+				socket.emit('submit', {
+					questionID: questionID,
+					answer: $("#answer").val().trim()
+				});
+				$("#answer").val("");
+			}
+		}
+	});
+
+	</script>
+</body>
+</html>
