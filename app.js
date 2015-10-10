@@ -5,7 +5,7 @@ var app = express();
 
 // server
 var server = require('http').Server(app);
-var port = '3000';
+var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 server.listen(port, function(){
   console.log('listening on: ' + this.address().port);
@@ -128,5 +128,20 @@ app.use(function(err, req, res, next) {
   });
 });
 
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
 
 module.exports = app;
